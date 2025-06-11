@@ -6,6 +6,7 @@
     <title>Sistema de Gestión de Vidrios</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Chosen Palette: Warm Neutrals & Blue Accent -->
     <!-- Application Structure Plan: A single-page application (SPA) with a fixed sidebar for navigation and a main content area that dynamically displays different sections (views). This structure was chosen for its high usability in a task-oriented business application, allowing users to switch between modules like Stock, Projects, and Quotes without page reloads, thus maintaining context and improving workflow efficiency. The Dashboard serves as the landing page, offering an immediate overview of key business metrics. -->
@@ -14,7 +15,7 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%);
+            background: linear-gradient(120deg, #a1c4fd 0%, #bde1f2 100%);
             background-attachment: fixed;
         }
         .glass-effect {
@@ -116,7 +117,7 @@
     <div class="flex h-screen">
         <aside class="w-20 md:w-64 glass-effect m-4 flex-col flex sidebar">
             <div class="h-16 flex items-center justify-center">
-                <h1 class="text-xl font-bold text-blue-900 hidden md:block">GestiónVidrio</h1>
+                <h1 class="text-xl font-bold text-blue-900 hidden md:block">AR - Aberturas</h1>
                 <span class="text-2xl md:hidden">💎</span>
             </div>
             <nav class="flex-1 px-2 md:px-4 py-4 space-y-2">
@@ -180,10 +181,18 @@
                 <div class="glass-effect p-4 md:p-6">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
                         <h3 class="text-xl font-semibold">Planchas Completas</h3>
-                        <button class="w-full md:w-auto bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 shadow-lg">Agregar Plancha</button>
+                        <button id="add-sheet-btn" class="w-full md:w-auto bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 shadow-lg">Agregar Plancha</button>
                     </div>
+                    <form id="sheet-form" class="mb-4 hidden flex flex-wrap gap-2">
+                        <input type="text" id="sheet-tipo" placeholder="Tipo" class="p-2 border rounded w-24">
+                        <input type="text" id="sheet-espesor" placeholder="Espesor" class="p-2 border rounded w-24">
+                        <input type="text" id="sheet-color" placeholder="Color" class="p-2 border rounded w-24">
+                        <input type="text" id="sheet-medidas" placeholder="Medidas" class="p-2 border rounded w-32">
+                        <input type="number" id="sheet-cantidad" placeholder="Cantidad" class="p-2 border rounded w-20">
+                        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg">Guardar</button>
+                    </form>
                     <div class="table-responsive">
-                        <table class="w-full text-left">
+                        <table class="w-full text-left" id="sheets-table">
                             <thead>
                                 <tr>
                                     <th class="p-2 md:p-3">Tipo</th>
@@ -212,14 +221,44 @@
                         </table>
                     </div>
                 </div>
-                <div class="glass-effect p-6 mt-8">
-                    <h3 class="text-xl font-semibold mb-4">Sobrantes (Recortes)</h3>
-                     <div class="table-responsive">
-                        <table class="w-full text-left">
-                            <thead><tr><th class="p-3">Medidas (mm)</th><th class="p-3">Tipo</th><th class="p-3">Ubicación</th><th class="p-3">Estado</th></tr></thead>
+                <div class="glass-effect p-4 md:p-6 mt-8">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
+                        <h3 class="text-xl font-semibold mb-4">Sobrantes (Recortes)</h3>
+                        <button id="add-sobrante-btn" class="w-full md:w-auto bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 shadow-lg">Agregar Sobrante</button>
+                    </div>
+                    <form id="sobrante-form" class="mb-4 hidden flex flex-wrap gap-2">
+                        <input type="text" id="sobrante-medidas" placeholder="Medidas (mm)" class="p-2 border rounded w-32">
+                        <input type="text" id="sobrante-tipo" placeholder="Tipo" class="p-2 border rounded w-32">
+                        <input type="text" id="sobrante-ubicacion" placeholder="Ubicación" class="p-2 border rounded w-24">
+                        <select id="sobrante-estado" class="p-2 border rounded w-28">
+                            <option value="Disponible">Disponible</option>
+                            <option value="Reservado">Reservado</option>
+                        </select>
+                        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg">Guardar</button>
+                    </form>
+                    <div class="table-responsive">
+                        <table class="w-full text-left" id="sobrantes-table">
+                            <thead>
+                                <tr>
+                                    <th class="p-3">Medidas (mm)</th>
+                                    <th class="p-3">Tipo</th>
+                                    <th class="p-3">Ubicación</th>
+                                    <th class="p-3">Estado</th>
+                                </tr>
+                            </thead>
                             <tbody>
-                                <tr><td class="p-3">1200x800</td><td class="p-3">Laminado 3+3</td><td class="p-3">Estante A2</td><td class="p-3"><span class="bg-green-200 text-green-900 px-2 py-1 rounded-full text-sm font-semibold">Disponible</span></td></tr>
-                                <tr><td class="p-3">950x1500</td><td class="p-3">Templado 10mm</td><td class="p-3">Carro 3</td><td class="p-3"><span class="bg-yellow-200 text-yellow-900 px-2 py-1 rounded-full text-sm font-semibold">Reservado</span></td></tr>
+                                <tr>
+                                    <td class="p-3">1200x800</td>
+                                    <td class="p-3">Laminado 3+3</td>
+                                    <td class="p-3">Estante A2</td>
+                                    <td class="p-3"><span class="bg-green-200 text-green-900 px-2 py-1 rounded-full text-sm font-semibold">Disponible</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3">950x1500</td>
+                                    <td class="p-3">Templado 10mm</td>
+                                    <td class="p-3">Carro 3</td>
+                                    <td class="p-3"><span class="bg-yellow-200 text-yellow-900 px-2 py-1 rounded-full text-sm font-semibold">Reservado</span></td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -228,17 +267,45 @@
 
             <section id="proyectos-view" class="view hidden">
                  <h2 class="text-3xl font-bold mb-6 text-white">Proyectos</h2>
-                 <div class="glass-effect p-6">
-                    <div class="flex justify-between items-center mb-4">
+                 <div class="glass-effect p-4 md:p-6">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
                         <h3 class="text-xl font-semibold">Listado de Proyectos</h3>
-                        <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 shadow-lg">Crear Proyecto</button>
+                        <button id="add-proyecto-btn" class="w-full md:w-auto bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 shadow-lg">Crear Proyecto</button>
                     </div>
+                    <form id="proyecto-form" class="mb-4 hidden flex flex-wrap gap-2">
+                        <input type="text" id="proyecto-cliente" placeholder="Cliente" class="p-2 border rounded w-32">
+                        <select id="proyecto-estado" class="p-2 border rounded w-28">
+                            <option value="En Proceso">En Proceso</option>
+                            <option value="Terminado">Terminado</option>
+                            <option value="Pausado">Pausado</option>
+                            <option value="Cancelado">Cancelado</option>
+                        </select>
+                        <input type="date" id="proyecto-entrega" class="p-2 border rounded w-36">
+                        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg">Guardar</button>
+                    </form>
                      <div class="table-responsive">
-                        <table class="w-full text-left">
-                            <thead><tr><th class="p-3">Cliente</th><th class="p-3">Estado</th><th class="p-3">Entrega Estimada</th><th class="p-3">Acciones</th></tr></thead>
+                        <table class="w-full text-left" id="proyectos-table">
+                            <thead>
+                                <tr>
+                                    <th class="p-3">Cliente</th>
+                                    <th class="p-3">Estado</th>
+                                    <th class="p-3">Entrega Estimada</th>
+                                    <th class="p-3">Acciones</th>
+                                </tr>
+                            </thead>
                             <tbody>
-                                <tr><td class="p-3">Constructora del Sur</td><td class="p-3"><span class="bg-blue-200 text-blue-900 px-2 py-1 rounded-full text-sm font-semibold">En Proceso</span></td><td class="p-3">30/06/2025</td><td class="p-3"><a href="#" class="text-blue-800 font-bold hover:underline">Ver Detalles</a></td></tr>
-                                <tr><td class="p-3">Ana García</td><td class="p-3"><span class="bg-green-200 text-green-900 px-2 py-1 rounded-full text-sm font-semibold">Terminado</span></td><td class="p-3">15/05/2025</td><td class="p-3"><a href="#" class="text-blue-800 font-bold hover:underline">Ver Detalles</a></td></tr>
+                                <tr>
+                                    <td class="p-3">Constructora del Sur</td>
+                                    <td class="p-3"><span class="bg-blue-200 text-blue-900 px-2 py-1 rounded-full text-sm font-semibold">En Proceso</span></td>
+                                    <td class="p-3">30/06/2025</td>
+                                    <td class="p-3"><a href="#" class="text-blue-800 font-bold hover:underline">Ver Detalles</a></td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3">Ana García</td>
+                                    <td class="p-3"><span class="bg-green-200 text-green-900 px-2 py-1 rounded-full text-sm font-semibold">Terminado</span></td>
+                                    <td class="p-3">15/05/2025</td>
+                                    <td class="p-3"><a href="#" class="text-blue-800 font-bold hover:underline">Ver Detalles</a></td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -250,9 +317,9 @@
                 <div class="glass-effect p-4 md:p-6">
                     <h3 class="text-xl font-semibold mb-4">Datos del Cliente</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <input type="text" placeholder="Nombre" class="w-full p-2 border rounded">
-                        <input type="text" placeholder="Teléfono" class="w-full p-2 border rounded">
-                        <input type="email" placeholder="Correo Electrónico" class="w-full p-2 border rounded md:col-span-2">
+                        <input type="text" placeholder="Nombre" class="w-full p-2 border rounded" id="cliente-nombre">
+                        <input type="text" placeholder="Teléfono" class="w-full p-2 border rounded" id="cliente-telefono">
+                        <input type="email" placeholder="Correo Electrónico" class="w-full p-2 border rounded md:col-span-2" id="cliente-email">
                     </div>
 
                     <h3 class="text-xl font-semibold mt-8 mb-4">Aberturas Requeridas</h3>
@@ -265,21 +332,23 @@
                                     <th class="p-2">Ancho (mm)</th>
                                     <th class="p-2">Alto (mm)</th>
                                     <th class="p-2">Subtotal</th>
+                                    <th class="p-2"></th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td class="p-1"><input type="number" value="1" class="w-16 p-1 border rounded"></td>
-                                    <td class="p-1"><input type="text" value="Laminado 3+3" class="w-full p-1 border rounded"></td>
-                                    <td class="p-1"><input type="number" value="800" class="w-24 p-1 border rounded"></td>
-                                    <td class="p-1"><input type="number" value="1200" class="w-24 p-1 border rounded"></td>
-                                    <td class="p-1 font-semibold">€ 96.00</td>
+                                    <td class="p-1"><input type="number" value="1" class="w-16 p-1 border rounded cantidad"></td>
+                                    <td class="p-1"><input type="text" value="Laminado 3+3" class="w-full p-1 border rounded tipo"></td>
+                                    <td class="p-1"><input type="number" value="800" class="w-24 p-1 border rounded ancho"></td>
+                                    <td class="p-1"><input type="number" value="1200" class="w-24 p-1 border rounded alto"></td>
+                                    <td class="p-1 font-semibold subtotal">€ 96.00</td>
+                                    <td class="p-1"><button class="text-red-600 font-bold eliminar-fila">✕</button></td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mt-4">
-                        <button class="text-blue-800 font-bold hover:underline">+ Agregar Fila</button>
+                        <button id="agregar-fila" class="text-blue-800 font-bold hover:underline">+ Agregar Fila</button>
                         <div class="text-right w-full md:w-auto">
                             <p class="text-xl font-semibold">Total: <span id="quote-total">€ 96.00</span></p>
                             <button class="mt-2 w-full md:w-auto bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 shadow-lg">Generar PDF</button>
@@ -479,6 +548,185 @@ document.addEventListener('DOMContentLoaded', function () {
             options: chartOptions
         });
     }
+
+    // --- INTERACTIVIDAD DEMO ---
+
+    // --- STOCK: Planchas ---
+    const addSheetBtn = document.getElementById('add-sheet-btn');
+    const sheetForm = document.getElementById('sheet-form');
+    const sheetsTable = document.getElementById('sheets-table').querySelector('tbody');
+    addSheetBtn.addEventListener('click', () => {
+        sheetForm.classList.toggle('hidden');
+    });
+    sheetForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const tipo = document.getElementById('sheet-tipo').value;
+        const espesor = document.getElementById('sheet-espesor').value;
+        const color = document.getElementById('sheet-color').value;
+        const medidas = document.getElementById('sheet-medidas').value;
+        const cantidad = document.getElementById('sheet-cantidad').value;
+        if(tipo && espesor && color && medidas && cantidad) {
+            const row = sheetsTable.insertRow();
+            row.innerHTML = `<td class='p-2 md:p-3'>${tipo}</td><td class='p-2 md:p-3'>${espesor}</td><td class='p-2 md:p-3'>${color}</td><td class='p-2 md:p-3'>${medidas}</td><td class='p-2 md:p-3'>${cantidad}</td>`;
+            sheetForm.reset();
+            sheetForm.classList.add('hidden');
+            alert('¡Plancha agregada!');
+        }
+    });
+
+    // --- STOCK: Sobrantes ---
+    const addSobranteBtn = document.getElementById('add-sobrante-btn');
+    const sobranteForm = document.getElementById('sobrante-form');
+    const sobrantesTable = document.getElementById('sobrantes-table').querySelector('tbody');
+    addSobranteBtn.addEventListener('click', () => {
+        sobranteForm.classList.toggle('hidden');
+    });
+    sobranteForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const medidas = document.getElementById('sobrante-medidas').value;
+        const tipo = document.getElementById('sobrante-tipo').value;
+        const ubicacion = document.getElementById('sobrante-ubicacion').value;
+        const estado = document.getElementById('sobrante-estado').value;
+        if(medidas && tipo && ubicacion && estado) {
+            const row = sobrantesTable.insertRow();
+            let estadoClass = estado === 'Disponible' ? 'bg-green-200 text-green-900' : 'bg-yellow-200 text-yellow-900';
+            row.innerHTML = `<td class='p-3'>${medidas}</td><td class='p-3'>${tipo}</td><td class='p-3'>${ubicacion}</td><td class='p-3'><span class='${estadoClass} px-2 py-1 rounded-full text-sm font-semibold'>${estado}</span></td>`;
+            sobranteForm.reset();
+            sobranteForm.classList.add('hidden');
+            alert('¡Sobrante agregado!');
+        }
+    });
+
+    // --- PROYECTOS ---
+    const addProyectoBtn = document.getElementById('add-proyecto-btn');
+    const proyectoForm = document.getElementById('proyecto-form');
+    const proyectosTable = document.getElementById('proyectos-table').querySelector('tbody');
+    addProyectoBtn.addEventListener('click', () => {
+        proyectoForm.classList.toggle('hidden');
+    });
+    proyectoForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const cliente = document.getElementById('proyecto-cliente').value;
+        const estado = document.getElementById('proyecto-estado').value;
+        const entrega = document.getElementById('proyecto-entrega').value;
+        if(cliente && estado && entrega) {
+            const row = proyectosTable.insertRow();
+            let estadoClass = '';
+            if(estado === 'En Proceso') estadoClass = 'bg-blue-200 text-blue-900';
+            else if(estado === 'Terminado') estadoClass = 'bg-green-200 text-green-900';
+            else if(estado === 'Pausado') estadoClass = 'bg-orange-200 text-orange-900';
+            else if(estado === 'Cancelado') estadoClass = 'bg-red-200 text-red-900';
+            row.innerHTML = `<td class='p-3'>${cliente}</td><td class='p-3'><span class='${estadoClass} px-2 py-1 rounded-full text-sm font-semibold'>${estado}</span></td><td class='p-3'>${entrega.split('-').reverse().join('/')}</td><td class='p-3'><a href='#' class='text-blue-800 font-bold hover:underline'>Ver Detalles</a></td>`;
+            proyectoForm.reset();
+            proyectoForm.classList.add('hidden');
+            alert('¡Proyecto creado!');
+        }
+    });
+
+    // --- PRESUPUESTO DINÁMICO ---
+    const precios = {
+        'Laminado 3+3': 100,
+        'Laminado 4+4': 120,
+        'Templado 8mm': 150,
+        'Templado 10mm': 180
+    };
+    function obtenerPrecio(tipo) {
+        // Busca precio exacto, si no, devuelve 100 por defecto
+        return precios[tipo.trim()] || 100;
+    }
+    function calcularSubtotal(cant, tipo, ancho, alto) {
+        const precio = obtenerPrecio(tipo);
+        const area = (parseFloat(ancho) * parseFloat(alto)) / 1000000; // mm2 a m2
+        return cant * precio * area;
+    }
+    function actualizarPresupuesto() {
+        let total = 0;
+        document.querySelectorAll('#quote-table tbody tr').forEach(tr => {
+            const cant = tr.querySelector('.cantidad').value;
+            const tipo = tr.querySelector('.tipo').value;
+            const ancho = tr.querySelector('.ancho').value;
+            const alto = tr.querySelector('.alto').value;
+            const subtotal = calcularSubtotal(cant, tipo, ancho, alto);
+            tr.querySelector('.subtotal').textContent = '€ ' + subtotal.toFixed(2);
+            total += subtotal;
+        });
+        document.getElementById('quote-total').textContent = '€ ' + total.toFixed(2);
+    }
+    // Eventos para recalcular
+    function agregarEventosFilaPresupuesto(tr) {
+        ['cantidad','tipo','ancho','alto'].forEach(clase => {
+            tr.querySelector('.' + clase).addEventListener('input', actualizarPresupuesto);
+        });
+        tr.querySelector('.eliminar-fila').addEventListener('click', function() {
+            tr.remove();
+            actualizarPresupuesto();
+        });
+    }
+    document.querySelectorAll('#quote-table tbody tr').forEach(agregarEventosFilaPresupuesto);
+    document.getElementById('agregar-fila').addEventListener('click', function() {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td class='p-1'><input type='number' value='1' class='w-16 p-1 border rounded cantidad'></td><td class='p-1'><input type='text' value='Laminado 3+3' class='w-full p-1 border rounded tipo'></td><td class='p-1'><input type='number' value='800' class='w-24 p-1 border rounded ancho'></td><td class='p-1'><input type='number' value='1200' class='w-24 p-1 border rounded alto'></td><td class='p-1 font-semibold subtotal'>€ 0.00</td><td class='p-1'><button class='text-red-600 font-bold eliminar-fila'>✕</button></td>`;
+        document.querySelector('#quote-table tbody').appendChild(tr);
+        agregarEventosFilaPresupuesto(tr);
+        actualizarPresupuesto();
+    });
+    // Inicial
+    actualizarPresupuesto();
+
+    // --- PRESUPUESTO: GENERAR PDF ---
+    document.querySelector('#presupuestos-view .bg-green-600').addEventListener('click', function(e) {
+        e.preventDefault();
+        const doc = new window.jspdf.jsPDF();
+        // Datos del cliente
+        const nombre = document.getElementById('cliente-nombre').value || '-';
+        const telefono = document.getElementById('cliente-telefono').value || '-';
+        const email = document.getElementById('cliente-email').value || '-';
+        let y = 15;
+        doc.setFontSize(16);
+        doc.text('Presupuesto de Vidrios', 105, y, {align: 'center'});
+        y += 10;
+        doc.setFontSize(12);
+        doc.text('Nombre: ' + nombre, 15, y);
+        y += 8;
+        doc.text('Teléfono: ' + telefono, 15, y);
+        y += 8;
+        doc.text('Email: ' + email, 15, y);
+        y += 12;
+        // Tabla de aberturas
+        doc.setFontSize(13);
+        doc.text('Aberturas:', 15, y);
+        y += 7;
+        doc.setFontSize(11);
+        doc.text('Cant.', 15, y);
+        doc.text('Tipo', 30, y);
+        doc.text('Ancho', 80, y);
+        doc.text('Alto', 110, y);
+        doc.text('Subtotal', 140, y);
+        y += 6;
+        doc.setLineWidth(0.1);
+        doc.line(15, y, 195, y);
+        y += 3;
+        let total = 0;
+        document.querySelectorAll('#quote-table tbody tr').forEach(tr => {
+            const cant = tr.querySelector('.cantidad').value;
+            const tipo = tr.querySelector('.tipo').value;
+            const ancho = tr.querySelector('.ancho').value;
+            const alto = tr.querySelector('.alto').value;
+            const subtotal = tr.querySelector('.subtotal').textContent;
+            doc.text(String(cant), 15, y);
+            doc.text(String(tipo), 30, y);
+            doc.text(String(ancho), 80, y);
+            doc.text(String(alto), 110, y);
+            doc.text(String(subtotal), 140, y);
+            y += 7;
+            if (y > 270) { doc.addPage(); y = 15; }
+            total += parseFloat(subtotal.replace('€','').replace(',','.')) || 0;
+        });
+        y += 5;
+        doc.setFontSize(13);
+        doc.text('Total: € ' + total.toFixed(2), 140, y);
+        doc.save('presupuesto_vidrios.pdf');
+    });
 });
 </script>
 
