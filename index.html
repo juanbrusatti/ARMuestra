@@ -67,12 +67,54 @@
                 height: 350px;
             }
         }
+        /* Nuevos estilos para móviles */
+        @media (max-width: 640px) {
+            .mobile-menu-button {
+                display: block;
+            }
+            .sidebar {
+                position: fixed;
+                left: -100%;
+                transition: left 0.3s ease;
+                z-index: 50;
+            }
+            .sidebar.active {
+                left: 0;
+            }
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+            .table-responsive {
+                font-size: 0.875rem;
+            }
+            .table-responsive th,
+            .table-responsive td {
+                padding: 0.5rem;
+            }
+            .glass-effect {
+                margin: 0.5rem;
+                padding: 0.75rem;
+            }
+            .chart-container {
+                height: 250px;
+            }
+            input, select {
+                font-size: 16px; /* Previene zoom en iOS */
+            }
+        }
     </style>
 </head>
 <body class="text-gray-900">
+    <!-- Botón de menú móvil -->
+    <button class="mobile-menu-button fixed top-4 left-4 z-50 bg-blue-600 text-white p-2 rounded-lg md:hidden">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+    </button>
 
     <div class="flex h-screen">
-        <aside class="w-20 md:w-64 glass-effect m-4 flex-col hidden sm:flex">
+        <aside class="w-20 md:w-64 glass-effect m-4 flex-col flex sidebar">
             <div class="h-16 flex items-center justify-center">
                 <h1 class="text-xl font-bold text-blue-900 hidden md:block">GestiónVidrio</h1>
                 <span class="text-2xl md:hidden">💎</span>
@@ -106,27 +148,27 @@
 
             <section id="dashboard-view" class="view">
                 <h2 class="text-3xl font-bold mb-6 text-white text-shadow">Dashboard</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                    <div class="glass-effect p-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8">
+                    <div class="glass-effect p-4 md:p-6">
                         <h3 class="text-lg font-semibold text-gray-700">Proyectos en Curso</h3>
-                        <p class="text-4xl font-bold mt-2">8</p>
+                        <p class="text-3xl md:text-4xl font-bold mt-2">8</p>
                     </div>
-                    <div class="glass-effect p-6">
+                    <div class="glass-effect p-4 md:p-6">
                         <h3 class="text-lg font-semibold text-gray-700">Presupuestos Pendientes</h3>
-                        <p class="text-4xl font-bold mt-2">12</p>
+                        <p class="text-3xl md:text-4xl font-bold mt-2">12</p>
                     </div>
-                    <div class="glass-effect p-6">
+                    <div class="glass-effect p-4 md:p-6">
                         <h3 class="text-lg font-semibold text-gray-700">Alertas de Stock</h3>
-                        <p class="text-4xl font-bold mt-2 text-orange-600">3</p>
+                        <p class="text-3xl md:text-4xl font-bold mt-2 text-orange-600">3</p>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div class="glass-effect p-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8">
+                    <div class="glass-effect p-4 md:p-6">
                         <h3 class="text-xl font-semibold mb-4">Proyectos por Estado</h3>
                         <div class="chart-container"><canvas id="projectsChart"></canvas></div>
                     </div>
-                    <div class="glass-effect p-6">
+                    <div class="glass-effect p-4 md:p-6">
                         <h3 class="text-xl font-semibold mb-4">Tipos de Vidrio en Stock</h3>
                         <div class="chart-container"><canvas id="stockChart"></canvas></div>
                     </div>
@@ -135,17 +177,37 @@
             
             <section id="stock-view" class="view hidden">
                 <h2 class="text-3xl font-bold mb-6 text-white">Gestión de Stock</h2>
-                <div class="glass-effect p-6">
-                    <div class="flex justify-between items-center mb-4">
+                <div class="glass-effect p-4 md:p-6">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
                         <h3 class="text-xl font-semibold">Planchas Completas</h3>
-                        <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 shadow-lg">Agregar Plancha</button>
+                        <button class="w-full md:w-auto bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 shadow-lg">Agregar Plancha</button>
                     </div>
                     <div class="table-responsive">
                         <table class="w-full text-left">
-                            <thead><tr><th class="p-3">Tipo</th><th class="p-3">Espesor</th><th class="p-3">Color</th><th class="p-3">Medidas</th><th class="p-3">Cantidad</th></tr></thead>
+                            <thead>
+                                <tr>
+                                    <th class="p-2 md:p-3">Tipo</th>
+                                    <th class="p-2 md:p-3">Espesor</th>
+                                    <th class="p-2 md:p-3">Color</th>
+                                    <th class="p-2 md:p-3">Medidas</th>
+                                    <th class="p-2 md:p-3">Cantidad</th>
+                                </tr>
+                            </thead>
                             <tbody>
-                                <tr><td class="p-3">Laminado</td><td class="p-3">3+3mm</td><td class="p-3">Incoloro</td><td class="p-3">3600x2500</td><td class="p-3">15</td></tr>
-                                <tr><td class="p-3">Templado</td><td class="p-3">10mm</td><td class="p-3">Fumée</td><td class="p-3">3210x2250</td><td class="p-3">5</td></tr>
+                                <tr>
+                                    <td class="p-2 md:p-3">Laminado</td>
+                                    <td class="p-2 md:p-3">3+3mm</td>
+                                    <td class="p-2 md:p-3">Incoloro</td>
+                                    <td class="p-2 md:p-3">3600x2500</td>
+                                    <td class="p-2 md:p-3">15</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-2 md:p-3">Templado</td>
+                                    <td class="p-2 md:p-3">10mm</td>
+                                    <td class="p-2 md:p-3">Fumée</td>
+                                    <td class="p-2 md:p-3">3210x2250</td>
+                                    <td class="p-2 md:p-3">5</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -185,28 +247,42 @@
 
             <section id="presupuestos-view" class="view hidden">
                 <h2 class="text-3xl font-bold mb-6 text-white">Generar Presupuesto</h2>
-                <div class="glass-effect p-6">
+                <div class="glass-effect p-4 md:p-6">
                     <h3 class="text-xl font-semibold mb-4">Datos del Cliente</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <input type="text" placeholder="Nombre" class="p-2 border rounded">
-                        <input type="text" placeholder="Teléfono" class="p-2 border rounded">
-                        <input type="email" placeholder="Correo Electrónico" class="p-2 border rounded col-span-1 md:col-span-2">
+                        <input type="text" placeholder="Nombre" class="w-full p-2 border rounded">
+                        <input type="text" placeholder="Teléfono" class="w-full p-2 border rounded">
+                        <input type="email" placeholder="Correo Electrónico" class="w-full p-2 border rounded md:col-span-2">
                     </div>
 
                     <h3 class="text-xl font-semibold mt-8 mb-4">Aberturas Requeridas</h3>
-                     <div class="table-responsive">
+                    <div class="table-responsive">
                         <table class="w-full text-left" id="quote-table">
-                            <thead><tr><th class="p-2">Cant.</th><th class="p-2">Tipo Vidrio</th><th class="p-2">Ancho (mm)</th><th class="p-2">Alto (mm)</th><th class="p-2">Subtotal</th></tr></thead>
+                            <thead>
+                                <tr>
+                                    <th class="p-2">Cant.</th>
+                                    <th class="p-2">Tipo Vidrio</th>
+                                    <th class="p-2">Ancho (mm)</th>
+                                    <th class="p-2">Alto (mm)</th>
+                                    <th class="p-2">Subtotal</th>
+                                </tr>
+                            </thead>
                             <tbody>
-                                <tr><td class="p-1"><input type="number" value="1" class="w-16 p-1 border rounded"></td><td class="p-1"><input type="text" value="Laminado 3+3" class="w-full p-1 border rounded"></td><td class="p-1"><input type="number" value="800" class="w-24 p-1 border rounded"></td><td class="p-1"><input type="number" value="1200" class="w-24 p-1 border rounded"></td><td class="p-1 font-semibold">€ 96.00</td></tr>
+                                <tr>
+                                    <td class="p-1"><input type="number" value="1" class="w-16 p-1 border rounded"></td>
+                                    <td class="p-1"><input type="text" value="Laminado 3+3" class="w-full p-1 border rounded"></td>
+                                    <td class="p-1"><input type="number" value="800" class="w-24 p-1 border rounded"></td>
+                                    <td class="p-1"><input type="number" value="1200" class="w-24 p-1 border rounded"></td>
+                                    <td class="p-1 font-semibold">€ 96.00</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
-                     <div class="flex justify-between items-center mt-4">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mt-4">
                         <button class="text-blue-800 font-bold hover:underline">+ Agregar Fila</button>
-                        <div class="text-right">
+                        <div class="text-right w-full md:w-auto">
                             <p class="text-xl font-semibold">Total: <span id="quote-total">€ 96.00</span></p>
-                            <button class="mt-2 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 shadow-lg">Generar PDF</button>
+                            <button class="mt-2 w-full md:w-auto bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 shadow-lg">Generar PDF</button>
                         </div>
                     </div>
                 </div>
@@ -251,18 +327,35 @@
 
             <section id="optimizador-view" class="view hidden">
                 <h2 class="text-3xl font-bold mb-6 text-white">Optimizador de Cortes</h2>
-                <div class="glass-effect p-6">
-                    <div class="mb-4"><label for="project-select" class="block font-semibold mb-2">Seleccionar proyecto para optimizar:</label><select id="project-select" class="p-2 border rounded w-full max-w-md"><option>Proyecto: Constructora del Sur</option><option>Proyecto: Remodelación Oficinas Centro</option></select></div>
+                <div class="glass-effect p-4 md:p-6">
+                    <div class="mb-4">
+                        <label for="project-select" class="block font-semibold mb-2">Seleccionar proyecto para optimizar:</label>
+                        <select id="project-select" class="w-full p-2 border rounded">
+                            <option>Proyecto: Constructora del Sur</option>
+                            <option>Proyecto: Remodelación Oficinas Centro</option>
+                        </select>
+                    </div>
                     <h3 class="text-xl font-semibold mt-8 mb-4">Plan de Corte - Plancha Laminado 3+3 (3600x2500mm)</h3>
-                    <div class="w-full bg-gray-200/50 border-2 border-gray-400/50 rounded-lg" style="padding-bottom: 69.44%; position: relative;">
+                    <div class="w-full bg-gray-200/50 border-2 border-gray-400/50 rounded-lg overflow-x-auto" style="padding-bottom: 69.44%; position: relative;">
                         <div class="absolute top-0 left-0 w-full h-full p-2">
-                            <div class="absolute bg-blue-300/80 border border-blue-600 flex items-center justify-center rounded" style="width: 22.2%; height: 48%; top: 2%; left: 2%;"><span class="text-sm text-blue-900 font-semibold">Corte 1<br>800x1200</span></div>
-                            <div class="absolute bg-blue-300/80 border border-blue-600 flex items-center justify-center rounded" style="width: 27.7%; height: 60%; top: 2%; left: 25.2%;"><span class="text-sm text-blue-900 font-semibold">Corte 2<br>1000x1500</span></div>
-                            <div class="absolute bg-blue-300/80 border border-blue-600 flex items-center justify-center rounded" style="width: 40%; height: 30%; top: 64%; left: 2%;"><span class="text-sm text-blue-900 font-semibold">Corte 3<br>1440x750</span></div>
-                            <div class="absolute bg-green-200/80 border border-dashed border-green-600 flex items-center justify-center rounded" style="width: 46.1%; height: 96%; top: 2%; left: 53.9%;"><span class="text-sm text-green-900 font-semibold">Sobrante<br>1660x2400</span></div>
+                            <div class="absolute bg-blue-300/80 border border-blue-600 flex items-center justify-center rounded" style="width: 22.2%; height: 48%; top: 2%; left: 2%;">
+                                <span class="text-xs md:text-sm text-blue-900 font-semibold">Corte 1<br>800x1200</span>
+                            </div>
+                            <div class="absolute bg-blue-300/80 border border-blue-600 flex items-center justify-center rounded" style="width: 27.7%; height: 60%; top: 2%; left: 25.2%;">
+                                <span class="text-xs md:text-sm text-blue-900 font-semibold">Corte 2<br>1000x1500</span>
+                            </div>
+                            <div class="absolute bg-blue-300/80 border border-blue-600 flex items-center justify-center rounded" style="width: 40%; height: 30%; top: 64%; left: 2%;">
+                                <span class="text-xs md:text-sm text-blue-900 font-semibold">Corte 3<br>1440x750</span>
+                            </div>
+                            <div class="absolute bg-green-200/80 border border-dashed border-green-600 flex items-center justify-center rounded" style="width: 46.1%; height: 96%; top: 2%; left: 53.9%;">
+                                <span class="text-xs md:text-sm text-green-900 font-semibold">Sobrante<br>1660x2400</span>
+                            </div>
                         </div>
                     </div>
-                     <div class="flex justify-end gap-4 mt-6"><button class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 shadow-lg">Imprimir Etiquetas</button><button class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 shadow-lg">Confirmar Corte</button></div>
+                    <div class="flex flex-col md:flex-row justify-end gap-4 mt-6">
+                        <button class="w-full md:w-auto bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 shadow-lg">Imprimir Etiquetas</button>
+                        <button class="w-full md:w-auto bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 shadow-lg">Confirmar Corte</button>
+                    </div>
                 </div>
             </section>
         </main>
@@ -272,8 +365,31 @@
 document.addEventListener('DOMContentLoaded', function () {
     const navItems = document.querySelectorAll('.nav-item');
     const views = document.querySelectorAll('.view');
+    const mobileMenuButton = document.querySelector('.mobile-menu-button');
+    const sidebar = document.querySelector('.sidebar');
     let projectsChartInstance, stockChartInstance;
     let chartsRendered = false;
+
+    // Toggle menú móvil
+    mobileMenuButton.addEventListener('click', () => {
+        sidebar.classList.toggle('active');
+    });
+
+    // Cerrar menú al hacer clic en un enlace en móvil
+    navItems.forEach(item => {
+        item.addEventListener('click', () => {
+            if (window.innerWidth < 768) {
+                sidebar.classList.remove('active');
+            }
+        });
+    });
+
+    // Cerrar menú al cambiar el tamaño de la ventana
+    window.addEventListener('resize', () => {
+        if (window.innerWidth >= 768) {
+            sidebar.classList.remove('active');
+        }
+    });
 
     function showView(hash) {
         const id = (hash ? hash.substring(1) : 'dashboard') + '-view';
